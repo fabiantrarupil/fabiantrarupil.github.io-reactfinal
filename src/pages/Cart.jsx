@@ -1,14 +1,47 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { CartContext } from '../context/CartContext';
-import { UserContext } from '../context/UserContext'; 
+import { useAuth } from '../context/UserContext';
 
 function Cart() {
     
     const { cart, addToCart, removeFromCart, cartTotal } = useContext(CartContext);
-    
-    const { token } = useContext(UserContext);
+    const { token } = useAuth();
 
+    const [checkoutMessage, setCheckoutMessage] = useState(''); 
+    
     const formattedTotal = cartTotal.toLocaleString('es-CL');
+
+    const handleCheckout = async () => {
+        if (cart.length === 0) {
+            setCheckoutMessage('El carrito está vacío. ¡No hay nada que pagar!');
+            return;
+        }
+        
+        if (!token) {
+            setCheckoutMessage('Debes iniciar sesión para finalizar la compra.');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:5000/api/checkouts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`, 
+                },
+                body: JSON.stringify({ cart: cart }), 
+            });
+
+            if (response.ok) {
+                setCheckoutMessage('¡Compra realizada con éxito!');
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al procesar la compra.');
+            }
+        } catch (error) {
+            setCheckoutMessage(`Error: ${error.message}`);
+        }
+    };
 
     return (
         <div className="container my-4">
@@ -49,11 +82,16 @@ function Cart() {
             <div className="d-grid gap-2">
                 <button
                     className="btn btn-primary btn-lg"
-                    onClick={() => alert('Función de pago aún no implementada')}
-                    disabled={!token}
+                    onClick={handleCheckout}
+                    disabled={!token || cart.length === 0}
                 >
                     Pagar
                 </button>
+                {checkoutMessage && (
+                    <div className={`alert mt-3 ${checkoutMessage.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
+                        {checkoutMessage}
+                    </div>
+                )}
             </div>
         </div>
     );

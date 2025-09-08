@@ -12,7 +12,7 @@ const Pizza = () => {
     // Simula una petición a la API
     const fetchPizza = async () => {
       try {
-        const res = await fetch(`/api/pizzas/${id}`); 
+        const res = await fetch(`http://localhost:5000/api/pizzas/${id}`);
         const data = await res.json();
         setPizza(data);
       } catch (error) {

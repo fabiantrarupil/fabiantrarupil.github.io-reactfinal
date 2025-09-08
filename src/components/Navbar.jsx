@@ -1,16 +1,16 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
-import { UserContext } from '../context/UserContext'; 
+import { useAuth } from '../context/UserContext';
 
 const Navbar = () => {
+    const { isAuthenticated, user, logout } = useAuth();
     const { cartTotal } = useContext(CartContext);
-    const { token, logout } = useContext(UserContext); 
     const navigate = useNavigate(); 
 
     const handleLogout = () => {
         logout();
-        navigate('/login'); // Corregido: redirige a la página de "Login".
+        navigate('/'); 
     };
 
     const formattedTotal = cartTotal.toLocaleString('es-CL');
@@ -24,11 +24,14 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className="btn btn-dark" to="/">Home</Link>
                         </li>
-
-                        {token ? ( 
+                    </ul>
+                    <ul className="navbar-nav">
+                        {isAuthenticated ? ( 
                             <>
                                 <li className="nav-item">
-                                    <Link className="btn btn-dark" to="/profile">Profile</Link>
+                                    <Link className="btn btn-dark" to="/profile">
+                                        {user}
+                                    </Link>
                                 </li>
                                 <li className="nav-item">
                                     <button 
@@ -49,12 +52,12 @@ const Navbar = () => {
                                 </li>
                             </>
                         )}
+                        <li className="nav-item">
+                            <Link className="btn btn-dark" to="/cart">
+                                Total: ${formattedTotal}
+                            </Link>
+                        </li>
                     </ul>
-                    <div className="d-flex">
-                        <Link className="btn btn-dark" to="/cart">
-                            Total: ${formattedTotal}
-                        </Link>
-                    </div>
                 </div>
             </div>
         </nav>

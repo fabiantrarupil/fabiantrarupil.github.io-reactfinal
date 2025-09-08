@@ -11,33 +11,35 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
 import { CartProvider } from './context/CartContext';
-import { UserProvider, UserContext } from './context/UserContext';
+import { AuthProvider, useAuth } from './context/UserContext';
 
 const ProtectedRoute = ({ element }) => {
-  const { token } = React.useContext(UserContext);
-  return token ? element : <Navigate to="/login" replace />;
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? element : <Navigate to="/login" replace />;
 };
 
 function App() {
-  return (
-    <UserProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/pizza/:id" element={<Pizza />} />
-            <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
-        </BrowserRouter>
-      </CartProvider>
-    </UserProvider>
-  );
+    return (
+        <AuthProvider>
+            <CartProvider>
+                <BrowserRouter>
+                    <Navbar />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/pizza/:id" element={<Pizza />} />
+
+                        <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
+
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    <Footer />
+                </BrowserRouter>
+            </CartProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;
